@@ -40,12 +40,11 @@ void ReversePrint() {
 	struct Node* temp = head;
 	
 	while(temp != NULL) {
-	sleep(1);
-	printf("Soy el Nodo con pid: ");
+		sleep(1);
+		printf("Soy el Nodo con pid: ");
 		printf("%d \n",temp->data);
 		temp = temp->next;
 	}
-	printf("\n");
 }
 
 void Print() {
@@ -62,48 +61,63 @@ void Print() {
 		printf("%d \n",temp->data);
 		temp = temp->prev;
 	}
-	printf("\n");
 }
 
-int main(int argc, char *argv[]) 
-{ 
-  
-  int fd[2], i = 0; 
-  pipe(fd); 
-   
-  int pidc; 
-  int n = atoi(argv[1]);
+int direction = 1;
+void handler_sigtstp(int sig){
+	if(direction == 1){
+		direction = 0;
+	}else{
+		direction = 1;
+	}
+}
+int main(int argc, char *argv[]) { 
+	int father = getpid();
+	int fd[2], i = 0; 
+	pipe(fd); 
+	int pidc; 
+  	int n = atoi(argv[1]);
 	int hijos[n];
 
-  for(int i=0; i<n;i++){
-	pid_t pid = fork();
-   if(pid > 0) { 
-      //wait(NULL); 
-      // padre  
-      close(0); 
-      close(fd[1]);  
-      dup(fd[0]);  
-      read(fd[0], &pidc, sizeof(pidc)); 
-	sleep(1);
-      printf("Soy el padre con pid %d y el pid de mi hijo es: %d \n",getpid(), pidc);
-	//hijos[i] =pidc;
-	InsertAtHead(pidc);
-	wait(NULL);  
-  }  
-  else if( pid == 0 ) { 
-      pidc= getpid();
-  
-      // no need to use the read end of pipe here so close it 
-      close(fd[0]);  
-  
-       // closing the standard output 
-      close(1);     
-  
-      // duplicating fd[0] with standard output 1 
-      dup(fd[1]);   
-      write(1, &pidc, sizeof(pidc)); 
-  }
- }
-	Print();
+  	for(int i=0; i<n;i++){
+		pid_t pid = fork();
+		if(pid > 0) { 
+			//wait(NULL); 
+			// padre  
+			close(0); 
+			close(fd[1]);  
+			dup(fd[0]);  
+			read(fd[0], &pidc, sizeof(pidc)); 
+			//sleep(1);
+			//printf("Soy el padre con pid %d y el pid de mi hijo es: %d \n",getpid(), pidc);
+			//hijos[i] =pidc;
+			InsertAtHead(pidc);
+			wait(NULL);  
+		}else if( pid == 0 ) { 
+			pidc= getpid();
+	
+			// no need to use the read end of pipe here so close it 
+			close(fd[0]);  
+		
+			// closing the standard output 
+			close(1);     
+		
+			// duplicating fd[0] with standard output 1 
+			dup(fd[1]);   
+			write(1, &pidc, sizeof(pidc)); 
+		}else{
+			wait(NULL);
+		}
+		
+	}
+	if(father == getpid()){
+		while (1){
+			signal(SIGTSTP,handler_sigtstp);
+			if (direction == 1) Print();
+			else ReversePrint();
+		}
+				
+	}
+	
 }  
 
