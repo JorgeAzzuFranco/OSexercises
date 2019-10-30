@@ -5,25 +5,42 @@
 #include <stdlib.h>
 #include <stdlib.h>
 #include <string.h>
-#define MAX_NAME_SZ 256
+#define MAX_NAME_SZ 1000
 
-void crearHijo(){
 
-    /*Dependiendo del texto que se ingrese así hay que evaluar y manejar la cadena para los parametros y para mandar a llamar el execve*/
+
+void crearHijo(char cadena[]){
+
+    char delim[] = " ","-";
+
+    char *ptr = strtok(cadena, delim);
+
+    while(ptr != NULL)
+	{
+		printf("'%s'\n", ptr);
+		ptr = strtok(NULL, delim);
+	}
+
     pid_t pid = vfork();
     if (pid == 0)
     {    
             char *arg[]={
-            "/usr/bin/ncal",
+            ptr,
             NULL
             };
 
+            /*
             char *amb[]={
             "HOME=/home/uca",
             "DISPLAY=:0.0",
             NULL
-            };
-        execve(arg[0],arg,amb);
+            };*/
+
+        printf("Desde el hijo: %s \n",ptr);
+
+        if(execve(arg[0],arg,NULL) == -1){
+            printf("No se encontro el comando debe ser del tipo /usr/bin/<comando> -param1 -param2 ...\n");
+        }
     }
 }
 
@@ -43,9 +60,8 @@ while(1){
         comando[strlen (comando) - 1] = '\0';
     
     /*-------------------------------*/
-        crearHijo();
+        crearHijo(comando);
         wait(NULL);
-        printf("%s\n",comando);
         free (comando);
     }
       return 0;
