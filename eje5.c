@@ -1,3 +1,4 @@
+
 #include <unistd.h> 
 #include <stdio.h> 
 #include <sys/types.h>
@@ -12,45 +13,41 @@ int gCont=0;
 
 int step = 1;
 
-typedef struct myThread{
+typedef struct hilo{
 	pthread_t* tid;
-	int index;
+    int index;
 } hilo;
 
 
-void handle_sighup(int sig){
-   
-		step = step * -1;
-
+void handle_sighup(int signum){
+		//holi
 }
 
-void *myThreadFun(void *vargp) 
-{ 
-    // Store the value argument passed to this thread 
+void *threads(void *vargp) {
     while(1){
 		pause();
-		sleep(2);	
+		sleep(1);
+        //fflush(stdout);
 		printf("tid: %ld \n",pthread_self());
 		kill(getpid(),4);
 	}
 } 
 
 int main(){
-    
+   
     signal(SIGINT, handle_sighup);
     
     
     for(int i=0;i<n;i++){
         pthread_t tid; 
-		hilo* myThread = (hilo *)malloc(sizeof(hilo));
-    	myThread->tid = &tid;
-    	myThread->index = i;
-        pthread_create(&tid, NULL, myThreadFun, (void *)myThread ); 
+	    hilo* hilos = (hilo *)malloc(sizeof(hilo));
+    	hilos->tid = &tid;
+	    hilos->index = i;
+        pthread_create(&tid, NULL, threads, (void *)hilos );
+        //pthread_join(tid,NULL);
         tids[i]=tid;
-            
     }
-    
-  
+
     while(1){
     	pthread_kill(tids[gCont], 4);
     	pause();
