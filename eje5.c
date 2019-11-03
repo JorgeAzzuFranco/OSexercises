@@ -5,58 +5,60 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <pthread.h>
-#define N  4
 
-pthread_t tids[N];
-int n = N;
-int gCont=0;
-
-int step = 1;
-
-typedef struct hilo{
+typedef struct hiloStruct{
 	pthread_t* tid;
-    int index;
-} hilo;
+} hiloStruct;
 
+int direccion = 1;
 
-void handle_sighup(int signum){
-		//holi
+void handler_signal(int sig){
+	if (sig ==  18){
+		direccion *= -1;
+	}else if(sig == 4){
+		//solo es para omitir la instruccion ilegal
+		return;
+	}else if(sig == 15){
+		exit(0);
+	}
 }
 
 void *threads(void *vargp) {
     while(1){
 		pause();
+		printf("TID: %ld \n",pthread_self());
 		sleep(1);
-        //fflush(stdout);
-		printf("tid: %ld \n",pthread_self());
 		kill(getpid(),4);
 	}
 } 
 
-int main(){
-   
-    signal(SIGINT, handle_sighup);
-    
+int main(int argc, char *argv[]){
+	int n = atoi(argv[1]);
+	pthread_t tids[n];
+	int c=0;
+    signal(SIGTSTP, handler_signal);
+    signal(SIGILL, handler_signal);
+    signal(SIGTERM, handler_signal);
     
     for(int i=0;i<n;i++){
+		hiloStruct* hilos = (hiloStruct *)malloc(sizeof(hiloStruct));
         pthread_t tid; 
-	    hilo* hilos = (hilo *)malloc(sizeof(hilo));
     	hilos->tid = &tid;
-	    hilos->index = i;
+
         pthread_create(&tid, NULL, threads, (void *)hilos );
         //pthread_join(tid,NULL);
         tids[i]=tid;
     }
 
     while(1){
-    	pthread_kill(tids[gCont], 4);
+    	pthread_kill(tids[c], 4);
     	pause();
-    	gCont = gCont + step;
-    	if(gCont == N){
-    		gCont =0;
-    	}
-    	if(gCont < 0){
-    		gCont =N-1;
+		sleep(1);
+    	c = c + direccion;
+    	if(c == n){
+    		c =0;
+    	}else if(c < 0){
+    		c =n-1;
     	}
     }
 
