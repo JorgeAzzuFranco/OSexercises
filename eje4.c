@@ -10,9 +10,16 @@ int iloc = 0;
 int direction = 1;
 int banderita = 0;
 void handler_sigtstp(int sig){
- if (direction == 1)
- { direction = 0; } 
-else { direction = 1; }
+	if (sig ==  18){
+		if (direction == 1){
+			direction = 0; 
+		}
+		else{
+			direction = 1; 
+		}
+	}else if (sig == 15){
+		exit(0);
+	}
 }
 void print(int arreglo[], int tamanio, int sHorario){ 
 	while (1) { 
