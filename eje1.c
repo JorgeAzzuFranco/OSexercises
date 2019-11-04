@@ -3,7 +3,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
  
-void tata(int x,int count){
+void childs(int x,int count){
    int child = fork();
    if(count == 0) return;
    else{
@@ -18,7 +18,7 @@ void tata(int x,int count){
        }else{
            wait(NULL);
        }
-           tata(x,--count);
+           childs(x,--count);
   
    }
 }
@@ -31,9 +31,9 @@ int main(){
 //        printf("PID: %ld\n",(long)getppid());
 //        printf("\t");
 //        printf("PID: %ld\n",(long)getpid());
-//        tata(x-1);
+//        childs(x-1);
 //    }else{
 //    }
-    tata(x,x);
+    childs(x,x);
     return 0;
 }
