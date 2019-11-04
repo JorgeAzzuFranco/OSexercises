@@ -3,6 +3,7 @@
 #include <unistd.h>  //Header file for sleep(). man 3 sleep for details. 
 #include <pthread.h>
 pthread_mutex_t lock;
+pthread_mutex_t mutex [100] = PTHREAD_MUTEX_INITIALIZER;
 
 //Estructura para enviar varios argumentos
 struct args {
@@ -29,13 +30,16 @@ void *bubbleSort(void *arguments)
    int i, j; 
    for (i = 0; i < n-1; i++)       
     {
-        pthread_mutex_lock(&lock);
      // Last i elements are already in place    
-       for (j = 0; j < n-i-1; j++){  
-           if (args->array[j] > args->array[j+1]) 
+       for (j = 0; j < n-i-1; j++){ 
+           pthread_mutex_lock(&mutex[j]);
+            pthread_mutex_lock(&mutex[j+1]);
+           if (args->array[j] > args->array[j+1]){ 
               swap(&(args->array[j]), &(args->array[j+1]));
-       }
-         pthread_mutex_unlock(&lock);
+           }
+           pthread_mutex_unlock(&mutex[j]);
+            pthread_mutex_unlock(&mutex[j+1]);
+          }
     }          
     
     return NULL;
@@ -58,13 +62,16 @@ void *bubbleSortInv(void *arguments)
     int n = args->numero;
    int i, j; 
    for (i = 0; i < n-1; i++){       
-  pthread_mutex_lock(&lock);
        // Last i elements are already in place    
        for (j = n-1; j > 0; j--){ 
-           if (args->array[j-1] > args->array[j])
+           pthread_mutex_lock(&mutex[j]);
+            pthread_mutex_lock(&mutex[j-1]);
+           if (args->array[j-1] > args->array[j]){
               swap(&(args->array[j-1]), &(args->array[j]));
+           }
+             pthread_mutex_unlock(&mutex[j]);
+            pthread_mutex_unlock(&mutex[j-1]);
        }
-         pthread_mutex_unlock(&lock);
    }
   
     return NULL;
