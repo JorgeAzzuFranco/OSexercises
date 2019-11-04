@@ -24,6 +24,7 @@ void childs(int x,int count){
 }
 int main(){
    int x;
+   printf("Ingrese cantidad: ");
    scanf("%d",&x);
    printf("PID: %ld\n",(long)getpid());
 //    if(fork()==0){
